@@ -175,12 +175,17 @@ struct DenseMap : protected Strategy<DenseMap<Key, Value, Strategy>> {
 
     iterator begin() {
         // TODO -- should ideally point to a valid one
-        KVPair *ptr = &(*std::find_if(storage.begin(), storage.end(), [](const KVPair &pair) {
+
+        auto vecIter = std::find_if(storage.begin(), storage.end(), [](const KVPair &pair) {
             return ! DenseMapKeyInfo<Key>::isEmpty(pair.first) && ! DenseMapKeyInfo<Key>::isTombstone(pair.first);
-        }));
+        });
 
         KVPair *endPtr = storage.data() + storage.size();
+        if ( vecIter == storage.end() ) {
+            return iterator{endPtr, endPtr};
+        }
 
+        KVPair *ptr = &(*vecIter);
         return iterator{ptr, endPtr};
     }
 
